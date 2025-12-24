@@ -362,62 +362,211 @@ export default function Dashboard() {
         {/* Detailed Summary Tables */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
           {/* Member Summary */}
-          <div className="bg-white rounded-xl shadow overflow-hidden">
-            <div className="px-6 py-4 bg-gray-50 border-b">
-              <h3 className="text-xl font-bold text-gray-900">সদস্য সারসংক্ষেপ - ওয়ারভিত্তিক</h3>
-            </div>
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-gray-100">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-sm font-medium text-gray-900">ওয়ার নাম</th>
-                    <th className="px-6 py-3 text-left text-sm font-medium text-gray-900">সাথী</th>
-                    <th className="px-6 py-3 text-left text-sm font-medium text-gray-900">কর্মী</th>
-                    <th className="px-6 py-3 text-left text-sm font-medium text-gray-900">সমর্থক</th>
-                    <th className="px-6 py-3 text-left text-sm font-medium text-gray-900">বন্ধু</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200">
-                  {Object.entries(worWiseData).map(([worName, data]) => (
-                    <tr key={worName}>
-                      <td className="px-6 py-4 font-medium text-gray-900">{worName}</td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center">
-                          <span className="font-semibold text-gray-900">{data.সাথী}</span>
-                          {data.সাথী > 0 && (
-                            <TrendingUp className="h-4 w-4 text-green-600 ml-2" />
-                          )}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center">
-                          <span className="font-semibold text-gray-900">{data.কর্মী}</span>
-                          {data.কর্মী > 0 && (
-                            <TrendingUp className="h-4 w-4 text-green-600 ml-2" />
-                          )}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className="font-semibold text-gray-900">{data.সমর্থক}</span>
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className="font-semibold text-gray-900">{data.বন্ধু}</span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-                <tfoot className="bg-gray-50">
-                  <tr>
-                    <td className="px-6 py-4 font-bold text-gray-900">মোট</td>
-                    <td className="px-6 py-4 font-bold text-gray-900">{totals.সাথী}</td>
-                    <td className="px-6 py-4 font-bold text-gray-900">{totals.কর্মী}</td>
-                    <td className="px-6 py-4 font-bold text-gray-900">{totals.সমর্থক}</td>
-                    <td className="px-6 py-4 font-bold text-gray-900">{totals.বন্ধু}</td>
-                  </tr>
-                </tfoot>
-              </table>
-            </div>
-          </div>
+          {/* Member Summary - বৃদ্ধি/ঘাটতি ভিত্তিক */}
+<div className="bg-white rounded-xl shadow overflow-hidden">
+  <div className="px-6 py-4 bg-gray-50 border-b">
+    <h3 className="text-xl font-bold text-gray-900">সদস্য বৃদ্ধি/ঘাটতি - ওয়ারভিত্তিক</h3>
+  </div>
+  <div className="overflow-x-auto">
+    <table className="w-full">
+      <thead className="bg-gray-100">
+        <tr>
+          <th className="px-6 py-3 text-left text-sm font-medium text-gray-900">ওয়ার নাম</th>
+          <th className="px-6 py-3 text-left text-sm font-medium text-gray-900">সাথী বৃদ্ধি</th>
+          <th className="px-6 py-3 text-left text-sm font-medium text-gray-900">সাথী ঘাটতি</th>
+          <th className="px-6 py-3 text-left text-sm font-medium text-gray-900">কর্মী বৃদ্ধি</th>
+          <th className="px-6 py-3 text-left text-sm font-medium text-gray-900">কর্মী ঘাটতি</th>
+          <th className="px-6 py-3 text-left text-sm font-medium text-gray-900">সমর্থক বৃদ্ধি</th>
+          <th className="px-6 py-3 text-left text-sm font-medium text-gray-900">সমর্থক ঘাটতি</th>
+          <th className="px-6 py-3 text-left text-sm font-medium text-gray-900">বন্ধু বৃদ্ধি</th>
+          <th className="px-6 py-3 text-left text-sm font-medium text-gray-900">বন্ধু ঘাটতি</th>
+        </tr>
+      </thead>
+      <tbody className="divide-y divide-gray-200">
+        {WOR_NAMES.map(worName => {
+          // Get all reports for this WOR
+          const worReports = allReports.filter(report => report.worName === worName);
+          
+          if (worReports.length === 0) return null;
+          
+          // Calculate total increases and decreases for this WOR
+          const increasesDecreases = worReports.reduce((acc, report) => {
+            acc.সাথী.increase += report.reports.সাথী.increase || 0;
+            acc.সাথী.decrease += report.reports.সাথী.decrease || 0;
+            acc.কর্মী.increase += report.reports.কর্মী.increase || 0;
+            acc.কর্মী.decrease += report.reports.কর্মী.decrease || 0;
+            acc.সমর্থক.increase += report.reports.সমর্থক.increase || 0;
+            acc.সমর্থক.decrease += report.reports.সমর্থক.decrease || 0;
+            acc.বন্ধু.increase += report.reports.বন্ধু.increase || 0;
+            acc.বন্ধু.decrease += report.reports.বন্ধু.decrease || 0;
+            return acc;
+          }, {
+            সাথী: { increase: 0, decrease: 0 },
+            কর্মী: { increase: 0, decrease: 0 },
+            সমর্থক: { increase: 0, decrease: 0 },
+            বন্ধু: { increase: 0, decrease: 0 }
+          });
+          
+          // Calculate net change (বৃদ্ধি - ঘাটতি)
+          const netChange = {
+            সাথী: increasesDecreases.সাথী.increase - increasesDecreases.সাথী.decrease,
+            কর্মী: increasesDecreases.কর্মী.increase - increasesDecreases.কর্মী.decrease,
+            সমর্থক: increasesDecreases.সমর্থক.increase - increasesDecreases.সমর্থক.decrease,
+            বন্ধু: increasesDecreases.বন্ধু.increase - increasesDecreases.বন্ধু.decrease
+          };
+          
+          return (
+            <tr key={worName} className="hover:bg-gray-50">
+              <td className="px-6 py-4 font-medium text-gray-900">{worName}</td>
+              
+              {/* সাথী */}
+              <td className="px-6 py-4">
+                <div className="flex items-center">
+                  <span className="font-semibold text-green-600">
+                    {increasesDecreases.সাথী.increase > 0 ? `+${increasesDecreases.সাথী.increase}` : '০'}
+                  </span>
+                  {netChange.সাথী > 0 && (
+                    <TrendingUp className="h-4 w-4 text-green-600 ml-2" />
+                  )}
+                </div>
+              </td>
+              <td className="px-6 py-4">
+                <div className="flex items-center">
+                  <span className="font-semibold text-red-600">
+                    {increasesDecreases.সাথী.decrease > 0 ? `-${increasesDecreases.সাথী.decrease}` : '০'}
+                  </span>
+                  {netChange.সাথী < 0 && (
+                    <TrendingDown className="h-4 w-4 text-red-600 ml-2" />
+                  )}
+                </div>
+              </td>
+              
+              {/* কর্মী */}
+              <td className="px-6 py-4">
+                <div className="flex items-center">
+                  <span className="font-semibold text-green-600">
+                    {increasesDecreases.কর্মী.increase > 0 ? `+${increasesDecreases.কর্মী.increase}` : '০'}
+                  </span>
+                  {netChange.কর্মী > 0 && (
+                    <TrendingUp className="h-4 w-4 text-green-600 ml-2" />
+                  )}
+                </div>
+              </td>
+              <td className="px-6 py-4">
+                <div className="flex items-center">
+                  <span className="font-semibold text-red-600">
+                    {increasesDecreases.কর্মী.decrease > 0 ? `-${increasesDecreases.কর্মী.decrease}` : '০'}
+                  </span>
+                  {netChange.কর্মী < 0 && (
+                    <TrendingDown className="h-4 w-4 text-red-600 ml-2" />
+                  )}
+                </div>
+              </td>
+              
+              {/* সমর্থক */}
+              <td className="px-6 py-4">
+                <div className="flex items-center">
+                  <span className="font-semibold text-green-600">
+                    {increasesDecreases.সমর্থক.increase > 0 ? `+${increasesDecreases.সমর্থক.increase}` : '০'}
+                  </span>
+                  {netChange.সমর্থক > 0 && (
+                    <TrendingUp className="h-4 w-4 text-green-600 ml-2" />
+                  )}
+                </div>
+              </td>
+              <td className="px-6 py-4">
+                <div className="flex items-center">
+                  <span className="font-semibold text-red-600">
+                    {increasesDecreases.সমর্থক.decrease > 0 ? `-${increasesDecreases.সমর্থক.decrease}` : '০'}
+                  </span>
+                  {netChange.সমর্থক < 0 && (
+                    <TrendingDown className="h-4 w-4 text-red-600 ml-2" />
+                  )}
+                </div>
+              </td>
+              
+              {/* বন্ধু */}
+              <td className="px-6 py-4">
+                <div className="flex items-center">
+                  <span className="font-semibold text-green-600">
+                    {increasesDecreases.বন্ধু.increase > 0 ? `+${increasesDecreases.বন্ধু.increase}` : '০'}
+                  </span>
+                  {netChange.বন্ধু > 0 && (
+                    <TrendingUp className="h-4 w-4 text-green-600 ml-2" />
+                  )}
+                </div>
+              </td>
+              <td className="px-6 py-4">
+                <div className="flex items-center">
+                  <span className="font-semibold text-red-600">
+                    {increasesDecreases.বন্ধু.decrease > 0 ? `-${increasesDecreases.বন্ধু.decrease}` : '০'}
+                  </span>
+                  {netChange.বন্ধু < 0 && (
+                    <TrendingDown className="h-4 w-4 text-red-600 ml-2" />
+                  )}
+                </div>
+              </td>
+            </tr>
+          );
+        })}
+      </tbody>
+      <tfoot className="bg-gray-50">
+        <tr>
+          <td className="px-6 py-4 font-bold text-gray-900">মোট</td>
+          
+          {/* Calculate totals for all WORs */}
+          {(() => {
+            const totals = allReports.reduce((acc, report) => {
+              acc.সাথী.increase += report.reports.সাথী.increase || 0;
+              acc.সাথী.decrease += report.reports.সাথী.decrease || 0;
+              acc.কর্মী.increase += report.reports.কর্মী.increase || 0;
+              acc.কর্মী.decrease += report.reports.কর্মী.decrease || 0;
+              acc.সমর্থক.increase += report.reports.সমর্থক.increase || 0;
+              acc.সমর্থক.decrease += report.reports.সমর্থক.decrease || 0;
+              acc.বন্ধু.increase += report.reports.বন্ধু.increase || 0;
+              acc.বন্ধু.decrease += report.reports.বন্ধু.decrease || 0;
+              return acc;
+            }, {
+              সাথী: { increase: 0, decrease: 0 },
+              কর্মী: { increase: 0, decrease: 0 },
+              সমর্থক: { increase: 0, decrease: 0 },
+              বন্ধু: { increase: 0, decrease: 0 }
+            });
+            
+            return (
+              <>
+                <td className="px-6 py-4 font-bold text-green-600">
+                  {totals.সাথী.increase > 0 ? `+${totals.সাথী.increase}` : '০'}
+                </td>
+                <td className="px-6 py-4 font-bold text-red-600">
+                  {totals.সাথী.decrease > 0 ? `-${totals.সাথী.decrease}` : '০'}
+                </td>
+                <td className="px-6 py-4 font-bold text-green-600">
+                  {totals.কর্মী.increase > 0 ? `+${totals.কর্মী.increase}` : '০'}
+                </td>
+                <td className="px-6 py-4 font-bold text-red-600">
+                  {totals.কর্মী.decrease > 0 ? `-${totals.কর্মী.decrease}` : '০'}
+                </td>
+                <td className="px-6 py-4 font-bold text-green-600">
+                  {totals.সমর্থক.increase > 0 ? `+${totals.সমর্থক.increase}` : '০'}
+                </td>
+                <td className="px-6 py-4 font-bold text-red-600">
+                  {totals.সমর্থক.decrease > 0 ? `-${totals.সমর্থক.decrease}` : '০'}
+                </td>
+                <td className="px-6 py-4 font-bold text-green-600">
+                  {totals.বন্ধু.increase > 0 ? `+${totals.বন্ধু.increase}` : '০'}
+                </td>
+                <td className="px-6 py-4 font-bold text-red-600">
+                  {totals.বন্ধু.decrease > 0 ? `-${totals.বন্ধু.decrease}` : '০'}
+                </td>
+              </>
+            );
+          })()}
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+</div>
 
           {/* Financial Summary */}
           <div className="bg-white rounded-xl shadow overflow-hidden">
